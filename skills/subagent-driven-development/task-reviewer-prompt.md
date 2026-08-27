@@ -122,8 +122,9 @@ Subagent (general-purpose):
 
     **Tests & Verification:**
     - Do the new and changed tests verify real behavior, not mocks?
-    - Is the implementation using real databases/storage without in-memory mock debt?
-    - If this is a Web/UI deliverable, is there evidence of real browser verification (Playwright / Chrome DevTools MCP check with 0 console errors) rather than jsdom-only assertions?
+    - Are all required environment and capability prerequisites verified, or is the task correctly reported as blocked?
+    - Is the required persistence, storage, service, or other core boundary exercised with the real implementation when acceptance requires it?
+    - If this is a Web/UI deliverable, is there evidence of an available supported real-browser verification with 0 unexpected console errors rather than jsdom-only assertions?
     - Are the task's edge cases covered?
 
     **Structure:**

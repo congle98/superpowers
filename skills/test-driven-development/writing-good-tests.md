@@ -14,8 +14,9 @@ here:
 ```
 
 Strict TDD produces both naturally: a test written first and watched
-failing against real code has already proven it can fail, and only earns
-a mock when the real dependency proves slow or external.
+failing against real code has already proven it can fail. A mock is valid
+only for one of the deliberate isolation reasons below; it must never replace
+a required integration boundary.
 
 ## Principle 1: Name the Break
 
@@ -132,43 +133,46 @@ break when the mock changes, switch to an integration test with real
 components. **your human partner's question:** "Do we need to be using a
 mock here?"
 
-**Real database and storage first.** Do not replace databases with
-in-memory arrays (`const store = []`) or fake repositories. Test against a
-real SQLite file or containerized database with real migrations. Mocking data
-access creates mock debt where queries, constraints, foreign keys, and
-transactions pass in tests but fail immediately in production.
+**Real required integrations first.** Do not replace a persistence, storage,
+service, or other core boundary that the acceptance criteria require with an
+in-memory array (`const store = []`), fake repository, hardcoded response, or
+simulated internal API. Use the real implementation, a real local file, or an
+ephemeral/containerized service with the real migrations and configuration.
+If the required dependency is unavailable, prepare it or report the task as
+blocked; do not silently downgrade the test.
 
 **Real browser execution for Web/UI.** JSDOM verifies that React/Vue
 components render a virtual tree; it does NOT verify CSS layout, visibility,
 z-index stacking, real network requests, hydration errors, or browser
-console cleanliness. For web deliverables, pair unit tests with real browser
-testing (Playwright or Chrome DevTools MCP) that navigates to the live route,
-asserts element visibility, and confirms zero console errors.
+console behavior. When browser behavior is part of acceptance criteria, pair
+unit tests with a supported real-browser check (Playwright or a configured
+Chrome DevTools MCP capability). Verify the required flow, expected DOM and
+interaction, and zero unexpected console errors. Review warnings separately.
 
-**Reserve mocks strictly for external boundaries.** Mock only external,
-third-party services that cannot be run locally (e.g. Stripe live API, SMS
-gateways, external OAuth providers). Never mock internal subsystems, database
-layers, or domain logic.
+**Mocks remain valid at deliberate seams.** Mocks may isolate a unit from a
+slow, nondeterministic, unavailable, paid, destructive, or intentionally
+external operation. Keep every side effect required by the behavior under
+test real. Never use a mock to replace the core persistence, service, or
+domain behavior being delivered.
 
 ### Gate Function
-
 ```
 BEFORE adding a mock or test helper:
   List the real method's side effects; keep the ones the test
-  depends on real — mock the slow/external level below them.
-
-  Confirm you are NOT mocking a database or internal storage engine.
-  IF testing Web/UI: plan a real browser check (Playwright/DevTools)
-  for layout and console validation.
+  depends on real — mock only one of the deliberate seam reasons listed
+  above, and only below the required behavior boundary.
+  Confirm you are not replacing a required persistence, storage, service,
+  or domain boundary with a fake.
+  IF browser behavior is part of acceptance: identify the supported browser
+  capability and plan the real-browser check; do not assume an MCP tool exists.
+  IF using a mock: document one deliberate seam reason from the policy above;
+  do not use it to replace a required integration boundary.
 
   Mock responses mirror the complete real structure.
-
   A method only tests call lives in test utilities, not production.
-
   About to assert on the mock itself?
     Unmock it or delete the assertion.
 ```
-
 ## Tests Ship With the Implementation
 
 The TDD cycle — failing test, minimal implementation, refactor — is what
@@ -218,5 +222,5 @@ test as tautological.
 - A method is called only from test files
 - Mock setup is more than half the test, or you can't explain why the mock is needed
 - Mocking "just to be safe"
-- Using an in-memory array (`const items = []`) or fake store instead of real database integration
-- Claiming Web/UI works based only on JSDOM render without real browser/E2E verification
+- Using an in-memory array (`const items = []`) or fake store instead of the real required integration boundary
+- Claiming Web/UI works based only on JSDOM render without the supported real-browser verification required by the acceptance criteria

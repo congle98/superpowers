@@ -100,43 +100,70 @@ naming and copy rules, platform requirements — one line each, with exact
 values copied verbatim from the spec. Every task's requirements implicitly
 include this section.]
 
-## Environment & Prerequisites (Task 0 / Preflight)
+## Environment & Capabilities Readiness (Task 0 / Preflight)
 
-[Document all setup required before starting core feature work. Clearly separate automated AI actions from required human partner inputs.]
-- **AI Actions (Automated):** [e.g., install dependencies, start docker services `docker compose up -d postgres`, run database migrations `alembic upgrade head` / `prisma migrate dev`, generate `.env` from `.env.example`]
-- **Human Actions Required (Gates):** [e.g., provide secret API keys, configure OAuth sandbox app, grant cloud permissions]
-- **Sanity Verification Command:** [e.g., `npm run db:ping` or curl healthcheck to prove services and database are live and reachable before Task 1]
+Document only the prerequisites required by this task. Cover the categories that apply and write `N/A — [reason]` for the rest:
 
-## Real Stack vs Mock Policy
+- **Runtime and toolchain:** [exact versions and commands]
+- **Project dependencies:** [package manager, install command, lockfile]
+- **Local/external services:** [services, containers, endpoints, ports]
+- **Browser/tooling:** [browser, Playwright, emulator, or other tools]
+- **Browser acceptance decision:** [`Required — cite the acceptance criterion and supported capability/command`, or `N/A — the acceptance criteria contain no browser behavior`]
+- **MCP capabilities:** [server/tool names and how they are verified]
+- **Credentials/permissions/network:** [human-provided secrets, accounts, roles, VPN, proxy]
+- **Data/state:** [migrations, fixtures, seed data, clean-state requirements]
+- **AI Actions:** [exact safe setup commands the agent can run]
+- **Human Actions Required (Gates):** [exact user action; do not invent secrets or permissions]
+- **Verification commands:** [one exact command per required capability and its expected evidence]
 
-- **Real-Stack-First:** Use real databases, storage engines, schema migrations, and core runtime technologies from Task 1.
-- **Prohibited:** In-memory fake arrays (`const users = []`), hardcoded mock JSON stores, or simulated API layers where real persistence is required by the spec.
-- **Allowed Mocks:** Mocks are strictly limited to non-hostable, paid, or destructive 3rd-party external boundaries (e.g., Stripe live charges, external SMS/Email gateways).
+Every plan must include the Task 0 section below. If no prerequisite is required, state `Task 0: Not applicable — [specific reason]` and mark every readiness category `N/A — [reason]`; do not copy generic setup steps.
+
+**Readiness rule:** Verify every required prerequisite before core implementation. If the agent can safely install or configure a missing prerequisite, it must do so and verify it afterward. If human action, secret, permission, account, cost, or external approval is required, stop and report the exact action. Do not silently skip, substitute an unapproved fallback, reduce acceptance scope, or claim readiness.
+
+## Real Integration vs Mock Policy
+
+- **Real-stack-first:** Use the real persistence, storage, service, browser, and core runtime boundaries required by the spec from the earliest meaningful integration task.
+- **Prohibited:** Fake persistence, hardcoded stores, or simulated internal APIs when real behavior is part of the acceptance criteria.
+- **Allowed mocks:** Mocks are allowed for deliberately isolated unit seams, slow or nondeterministic operations, unavailable/paid/destructive external services, and other boundaries whose real side effects are not part of the test. Keep all side effects required by the behavior under test real.
+- **Integration/E2E:** Do not use mocks to replace the core integration being delivered. If a required real dependency is unavailable, prepare it or mark the task blocked.
 
 ---
 ```
 
 ## Task Structure
 
-### Task 0: Environment Setup & Sanity Verification (when applicable)
+### Task 0: Environment Setup & Capability Verification
 
 ````markdown
-### Task 0: Environment Setup & Health Verification
+### Task 0: Environment Setup & Capability Verification
 
 **Files:**
-- Create: `.env.example`, `docker-compose.yml`, `src/db/schema.sql` (if needed)
-- Test/Verify: Sanity check command
+- Create/Modify: [only files genuinely needed for setup, or `None`]
+- Test/Verify: [exact verification script or command]
 
-- [ ] **Step 1: AI Setup Actions**
-Run automated package installs, start local containers, copy env files.
+**Prerequisites:**
+- [Required capability and exact version/configuration]
+- [Human gate, or `None`]
 
-- [ ] **Step 2: Human Action Gate (if secrets/keys required)**
-Prompt human partner for required credentials or external permissions.
+- [ ] **Step 1: Verify the declared environment**
+Run the exact checks listed in `Environment & Capabilities Readiness`.
+Expected: each required capability is present and reachable.
 
-- [ ] **Step 3: Run Sanity Verification**
-Run: `npm run healthcheck` (or DB connection probe).
-Expected: 0 errors, DB connected, services ready.
+- [ ] **Step 2: Perform safe AI setup actions**
+Run the exact install/configuration commands listed in the plan. Do not
+invent credentials, permissions, or external account values.
+
+- [ ] **Step 3: Complete human action gates (if any)**
+If a required human action remains incomplete, stop with status `BLOCKED`
+and report the exact action and the verification command. Do not dispatch
+implementation tasks or use an unapproved fallback.
+
+- [ ] **Step 4: Run readiness verification**
+Run: [exact project-specific command(s)]
+Expected: [exact output/condition for every required capability]
 ````
+
+If the plan has no required prerequisites, explicitly write `Task 0: Not applicable — [reason]` and begin with the first feature task.
 
 ### Feature Tasks
 
@@ -179,10 +206,17 @@ def function(input):
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: PASS
 
-- [ ] **Step 5: Browser / E2E Verification (for Web/UI tasks)**
+- [ ] **Step 5: Browser / E2E Verification (only when `Browser acceptance decision` is `Required`)**
 
-Run: Playwright test, or Chrome DevTools MCP navigation check (`navigate_page`, `evaluate_script`, `take_screenshot`, `list_console_messages`).
-Expected: Page loads with HTTP 200, element rendered & clickable, 0 console errors/warnings.
+Use the supported capability and exact command named in `Environment & Capabilities Readiness`.
+If the required browser tool is unavailable, install/configure it when safe;
+otherwise stop and report the human setup required. Do not silently substitute
+an unapproved browser or manual check.
+
+Run: [exact Playwright or supported browser verification command/tool call]
+Expected: [required user flow passes, expected elements are rendered and
+interactive, and there are 0 unexpected console errors; explain accepted
+warnings rather than treating every warning as a failure]
 
 - [ ] **Step 6: Commit**
 
@@ -201,8 +235,9 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
-- Mocking databases or persistent state when real architecture is specified
-- Vague environment setup ("set up database") without exact commands and sanity checks
+- Fake persistence when real architecture is specified
+- Vague environment setup ("set up the environment") without exact commands, expected evidence, and an explicit `N/A` rationale where appropriate
+- Browser verification that names a tool without checking its availability or specifying a concrete command/tool call
 
 ## Self-Review
 
@@ -214,11 +249,13 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-**4. Environment & Preflight Check:** Are AI setup actions separated from Human action gates? Is there a Task 0 sanity verification command to confirm real databases and services are live before Task 1?
+**4. Environment & Capability Check:** Are all required runtime, dependencies, services, tools, browser/MCP capabilities, credentials, permissions, network access, and data state identified? Are AI actions separated from human gates? Does each required capability have an exact verification command, or an explicit `N/A` rationale?
 
-**5. Real Stack First Check:** Does the plan use real databases, migrations, and core technologies from Task 1 instead of accumulating mock debt or fake in-memory stores?
+**5. Real Integration Check:** Does the plan use the real core boundaries required by the spec from the earliest meaningful integration task? Are mocks limited to deliberate seams without replacing required persistence or service behavior?
 
-**6. Web / Browser Verification Check:** For any Web/UI deliverables, do the verification steps specify real browser testing (Playwright / Chrome DevTools MCP checks: status 200, DOM visibility, 0 console errors) instead of jsdom-only unit tests?
+**6. Web / Browser Verification Check:** Does every plan make an explicit `Browser acceptance decision` tied to the spec's acceptance criteria? If `Required`, does it identify an available supported browser capability and exact command with 0 unexpected console errors? If `N/A`, is the reason clear?
+
+If any check fails, fix the plan inline before handoff. If a requirement has no implementation task, add the missing task. Re-run the self-review after making changes.
 
 ## Execution Handoff
 
@@ -228,7 +265,7 @@ After saving the plan, offer execution choice:
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 
-**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
+**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints for review
 
 **Which approach?"**
 

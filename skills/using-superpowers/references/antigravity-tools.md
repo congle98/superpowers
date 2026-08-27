@@ -34,7 +34,7 @@ When verifying Web/UI deliverables, Antigravity provides access to the `chrome-d
 - `call_mcp_tool` with `ServerName: "chrome-devtools"`:
   - `navigate_page`: Load target local/remote URL.
   - `evaluate_script`: Evaluate JavaScript expressions and inspect DOM state directly.
-  - `list_console_messages` / `get_console_message`: Verify zero uncaught errors, warnings, or unhandled exceptions.
+  - `list_console_messages` / `get_console_message`: Verify zero unexpected console errors or unhandled exceptions; review warnings separately and document accepted ones.
   - `take_screenshot`: Capture visual state of components.
   - `click`, `fill`, `fill_form`: Simulate real user interactions.
 - Alternatively, run headless Playwright test suites (`npx playwright test`) via `run_command`.

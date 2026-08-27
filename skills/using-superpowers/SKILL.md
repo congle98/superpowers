@@ -23,6 +23,12 @@ This is not negotiable. You cannot rationalize your way out of this.
 
 Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, create a todo per item.
 
+## Required Environment and Capabilities
+
+When a task depends on a runtime, dependency, service, tool, browser, MCP capability, credential, permission, network path, or required data state, treat it as a prerequisite to verify — not an optional suggestion. If the agent can safely install or configure it, do so and verify it. If human action, secret, account, permission, cost, or external approval is required, stop and report the exact action and verification command. Never silently skip a required prerequisite, invent access values, use an unapproved fallback, reduce acceptance scope, or claim completion while it remains unavailable.
+
+Only check capabilities relevant to the task. A task that does not need a browser, MCP server, database, or external service must not be forced to install one.
+
 ## Skill Priority
 
 When multiple skills apply, process skills come first — they set the approach, then implementation skills (frontend-design, etc.) carry it out. Brainstorming and systematic-debugging are Superpowers' most common process skills, but the rule holds for any of them.

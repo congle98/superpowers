@@ -85,6 +85,7 @@ Subagent (general-purpose):
     - You need to understand code beyond what was provided and can't find clarity
     - You feel uncertain about whether your approach is correct
     - The task involves restructuring existing code in ways the plan didn't anticipate
+    - A required environment or capability is missing and cannot be safely prepared without human action
     - You've been reading file after file trying to understand the system without progress
 
     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
@@ -113,8 +114,9 @@ Subagent (general-purpose):
 
     **Testing:**
     - Do tests actually verify behavior (not just mock behavior)?
-    - Did I test against real database/storage rather than accumulating in-memory mock debt?
-    - If this is a Web/UI deliverable, did I verify the page in a real browser (Playwright or Chrome DevTools MCP: 200 OK, interactive, 0 console errors) instead of relying solely on jsdom?
+    - Are all required environment and capability prerequisites verified, or is the task explicitly BLOCKED with the exact human action needed?
+    - Did I test required persistence/storage/service boundaries with the real implementation rather than accumulating fake integration debt?
+    - If this is a Web/UI deliverable, did I use an available supported real-browser capability (Playwright or configured Chrome DevTools MCP) and verify 0 unexpected console errors instead of relying solely on jsdom?
     - Did I follow TDD if required?
     - Are tests comprehensive?
     - Is the test output pristine (no stray warnings or noise)?

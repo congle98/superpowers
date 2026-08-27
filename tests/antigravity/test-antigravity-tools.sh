@@ -39,8 +39,17 @@ grep -q '`research`' "$MAPPING" \
 grep -qE 'ArtifactType.*task|task. artifact' "$MAPPING" \
   || fail "mapping does not document task tracking as a 'task' artifact"
 
+# --- Browser mapping ---------------------------------------------------------
+grep -q 'chrome-devtools' "$MAPPING" \
+  || fail "mapping does not document the chrome-devtools capability"
+grep -q 'call_mcp_tool' "$MAPPING" \
+  || fail "mapping does not document the call_mcp_tool entry point"
+grep -q 'fill_form' "$MAPPING" \
+  || fail "mapping does not document the fill_form browser action"
+
+
 # --- SKILL.md Platform Adaptation links the mapping -------------------------
 grep -q "antigravity-tools.md" "$SKILL" \
   || fail "SKILL.md Platform Adaptation does not reference antigravity-tools.md"
 
-echo "PASS: Antigravity tool mapping valid (subagent dispatch, task artifact, SKILL.md link)"
+echo "PASS: Antigravity tool mapping valid (subagent, task artifact, browser mapping, SKILL.md link)"

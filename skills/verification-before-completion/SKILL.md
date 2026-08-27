@@ -43,11 +43,11 @@ Skip any step = lying, not verifying
 | Linter clean | Linter output: 0 errors | Partial check, extrapolation |
 | Type check clean | Typechecker (`tsc --noEmit`, `mypy`, `cargo check`): 0 errors | Linter passing, code compiles |
 | Build succeeds | Build command: exit 0 | Linter passing, logs look good |
-| Web UI / Frontend works | Real browser / Playwright / Chrome DevTools MCP: 200 OK, elements rendered, 0 console errors | jsdom unit test passes, "component mounted" |
-| Database persistence works | Real integration test / migration executed on live DB instance | Mock ORM / in-memory array |
+| Web UI / Frontend works | Supported real-browser verification for the required flow: expected response, elements rendered/interactable, 0 unexpected console errors | jsdom unit test passes, "component mounted" |
+| Required integration works | Real implementation/service/storage boundary exercised when required by acceptance criteria | Mock or in-memory substitute for the required boundary |
+| Environment ready | Each required capability has a passing setup/health check and expected evidence | Packages installed, `.env` created, or one unrelated healthcheck |
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified | Test passes once |
-| Environment ready | Sanity/healthcheck command: exit 0, ports open, DB pinged | Packages installed, `.env` created |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
 
@@ -59,7 +59,8 @@ Skip any step = lying, not verifying
 - Trusting agent success reports
 - Relying on partial verification
 - Assuming Web UI works because jsdom/mock tests pass
-- Assuming Database integration works because mock repository tests pass
+- Assuming a required integration works because a substitute boundary passed
+- Assuming environment readiness because packages were installed without capability checks
 - Thinking "just this once"
 - Tired and wanting work over
 - **ANY wording implying success without having run verification**
@@ -72,8 +73,9 @@ Skip any step = lying, not verifying
 | "I'm confident" | Confidence ≠ evidence |
 | "Just this once" | No exceptions |
 | "Linter passed" | Linter ≠ compiler / typechecker |
-| "JSDOM tests passed so web UI works" | JSDOM does not verify layout, CSS, browser APIs, hydration, or console errors. Verify in real browser / Playwright / DevTools MCP. |
-| "Mock database works, will connect later" | Mock debt breaks in production. Test against real DB / container. |
+| "JSDOM tests passed so web UI works" | JSDOM does not verify layout, CSS, browser APIs, hydration, or console behavior. Use an available supported real-browser capability when browser behavior is part of acceptance. |
+| "The substitute implementation works, will integrate later" | A substitute cannot prove a required integration boundary. Prepare the real dependency or report the task as blocked. |
+| "Packages are installed, so the environment is ready" | Verify every required capability with its setup/health command. |
 | "Agent said success" | Verify independently |
 | "I'm tired" | Exhaustion ≠ excuse |
 | "Partial check is enough" | Partial proves nothing |
@@ -87,16 +89,16 @@ Skip any step = lying, not verifying
 ❌ "Should pass now" / "Looks correct"
 ```
 
-**Web UI & Browser Verification (Playwright / Chrome DevTools MCP):**
+**Web UI & Browser Verification:**
 ```
-✅ [Navigate page / Run Playwright] [Verify: 200 OK, element visible & interactive, 0 console errors] "UI verified in browser"
+✅ [Use the supported browser capability named in the plan] [Verify the required flow, expected response, rendered/interactable elements, and 0 unexpected console errors; document accepted warnings] "UI verified in browser"
 ❌ "Component rendered in React test / jsdom"
 ```
 
-**Real Database & Persistence:**
+**Required Integration Verification:**
 ```
-✅ [Run migration & execute query on live DB] [See: record persisted and retrieved] "Real database persistence verified"
-❌ "Mock repository returned fixture"
+✅ [Exercise the required real service/storage/persistence boundary] [See the expected state change or response]
+❌ "Substitute repository returned fixture"
 ```
 
 **Type Check & Static Analysis:**

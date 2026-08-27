@@ -24,6 +24,8 @@ Load plan, review critically, execute all tasks, report when complete.
 
 ### Step 2: Execute Tasks
 
+Before executing feature tasks, inspect the plan's `Environment & Capabilities Readiness` section and its Task 0 section. Every plan must include Task 0. If any readiness category is required, execute Task 0 and verify every required capability. If all categories are explicitly `N/A` with reasons, record that no preflight setup is needed. If the declarations and Task 0 disagree, stop because the plan is broken. If a human action gate or other prerequisite remains incomplete, stop with the exact blocker and verification command; do not invent access values, use an unapproved fallback, or continue.
+
 For each task:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)

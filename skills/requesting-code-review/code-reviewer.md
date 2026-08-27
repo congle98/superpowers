@@ -65,8 +65,9 @@ Subagent (general-purpose):
 
     **Testing & Verification:**
     - Tests verify real behavior, not mocks?
-    - Persistent data uses real database/storage (no in-memory mock debt)?
-    - Web/UI deliverables verified in real browser (Playwright / Chrome DevTools MCP with 0 console errors)?
+    - Required persistence, storage, service, or other core boundaries use the real implementation where the acceptance criteria require it?
+    - Required environment and capability prerequisites are verified, or missing human inputs are reported as blockers?
+    - Web/UI deliverables use an available supported real-browser capability (Playwright or configured Chrome DevTools MCP) with 0 unexpected console errors?
     - Edge cases covered?
     - Integration tests where they matter?
     - All tests passing?
