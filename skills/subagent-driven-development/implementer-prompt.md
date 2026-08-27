@@ -113,6 +113,8 @@ Subagent (general-purpose):
 
     **Testing:**
     - Do tests actually verify behavior (not just mock behavior)?
+    - Did I test against real database/storage rather than accumulating in-memory mock debt?
+    - If this is a Web/UI deliverable, did I verify the page in a real browser (Playwright or Chrome DevTools MCP: 200 OK, interactive, 0 console errors) instead of relying solely on jsdom?
     - Did I follow TDD if required?
     - Are tests comprehensive?
     - Is the test output pristine (no stray warnings or noise)?

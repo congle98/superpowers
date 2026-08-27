@@ -100,10 +100,45 @@ naming and copy rules, platform requirements — one line each, with exact
 values copied verbatim from the spec. Every task's requirements implicitly
 include this section.]
 
+## Environment & Prerequisites (Task 0 / Preflight)
+
+[Document all setup required before starting core feature work. Clearly separate automated AI actions from required human partner inputs.]
+- **AI Actions (Automated):** [e.g., install dependencies, start docker services `docker compose up -d postgres`, run database migrations `alembic upgrade head` / `prisma migrate dev`, generate `.env` from `.env.example`]
+- **Human Actions Required (Gates):** [e.g., provide secret API keys, configure OAuth sandbox app, grant cloud permissions]
+- **Sanity Verification Command:** [e.g., `npm run db:ping` or curl healthcheck to prove services and database are live and reachable before Task 1]
+
+## Real Stack vs Mock Policy
+
+- **Real-Stack-First:** Use real databases, storage engines, schema migrations, and core runtime technologies from Task 1.
+- **Prohibited:** In-memory fake arrays (`const users = []`), hardcoded mock JSON stores, or simulated API layers where real persistence is required by the spec.
+- **Allowed Mocks:** Mocks are strictly limited to non-hostable, paid, or destructive 3rd-party external boundaries (e.g., Stripe live charges, external SMS/Email gateways).
+
 ---
 ```
 
 ## Task Structure
+
+### Task 0: Environment Setup & Sanity Verification (when applicable)
+
+````markdown
+### Task 0: Environment Setup & Health Verification
+
+**Files:**
+- Create: `.env.example`, `docker-compose.yml`, `src/db/schema.sql` (if needed)
+- Test/Verify: Sanity check command
+
+- [ ] **Step 1: AI Setup Actions**
+Run automated package installs, start local containers, copy env files.
+
+- [ ] **Step 2: Human Action Gate (if secrets/keys required)**
+Prompt human partner for required credentials or external permissions.
+
+- [ ] **Step 3: Run Sanity Verification**
+Run: `npm run healthcheck` (or DB connection probe).
+Expected: 0 errors, DB connected, services ready.
+````
+
+### Feature Tasks
 
 ````markdown
 ### Task N: [Component Name]
@@ -144,7 +179,12 @@ def function(input):
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Browser / E2E Verification (for Web/UI tasks)**
+
+Run: Playwright test, or Chrome DevTools MCP navigation check (`navigate_page`, `evaluate_script`, `take_screenshot`, `list_console_messages`).
+Expected: Page loads with HTTP 200, element rendered & clickable, 0 console errors/warnings.
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add tests/path/test.py src/path/file.py
@@ -161,6 +201,8 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
+- Mocking databases or persistent state when real architecture is specified
+- Vague environment setup ("set up database") without exact commands and sanity checks
 
 ## Self-Review
 
@@ -172,7 +214,11 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+**4. Environment & Preflight Check:** Are AI setup actions separated from Human action gates? Is there a Task 0 sanity verification command to confirm real databases and services are live before Task 1?
+
+**5. Real Stack First Check:** Does the plan use real databases, migrations, and core technologies from Task 1 instead of accumulating mock debt or fake in-memory stores?
+
+**6. Web / Browser Verification Check:** For any Web/UI deliverables, do the verification steps specify real browser testing (Playwright / Chrome DevTools MCP checks: status 200, DOM visibility, 0 console errors) instead of jsdom-only unit tests?
 
 ## Execution Handoff
 

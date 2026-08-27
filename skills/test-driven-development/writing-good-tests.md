@@ -132,12 +132,34 @@ break when the mock changes, switch to an integration test with real
 components. **your human partner's question:** "Do we need to be using a
 mock here?"
 
+**Real database and storage first.** Do not replace databases with
+in-memory arrays (`const store = []`) or fake repositories. Test against a
+real SQLite file or containerized database with real migrations. Mocking data
+access creates mock debt where queries, constraints, foreign keys, and
+transactions pass in tests but fail immediately in production.
+
+**Real browser execution for Web/UI.** JSDOM verifies that React/Vue
+components render a virtual tree; it does NOT verify CSS layout, visibility,
+z-index stacking, real network requests, hydration errors, or browser
+console cleanliness. For web deliverables, pair unit tests with real browser
+testing (Playwright or Chrome DevTools MCP) that navigates to the live route,
+asserts element visibility, and confirms zero console errors.
+
+**Reserve mocks strictly for external boundaries.** Mock only external,
+third-party services that cannot be run locally (e.g. Stripe live API, SMS
+gateways, external OAuth providers). Never mock internal subsystems, database
+layers, or domain logic.
+
 ### Gate Function
 
 ```
 BEFORE adding a mock or test helper:
   List the real method's side effects; keep the ones the test
   depends on real — mock the slow/external level below them.
+
+  Confirm you are NOT mocking a database or internal storage engine.
+  IF testing Web/UI: plan a real browser check (Playwright/DevTools)
+  for layout and console validation.
 
   Mock responses mirror the complete real structure.
 
@@ -196,3 +218,5 @@ test as tautological.
 - A method is called only from test files
 - Mock setup is more than half the test, or you can't explain why the mock is needed
 - Mocking "just to be safe"
+- Using an in-memory array (`const items = []`) or fake store instead of real database integration
+- Claiming Web/UI works based only on JSDOM render without real browser/E2E verification

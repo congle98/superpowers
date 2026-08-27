@@ -41,9 +41,13 @@ Skip any step = lying, not verifying
 |-------|----------|----------------|
 | Tests pass | Test command output: 0 failures | Previous run, "should pass" |
 | Linter clean | Linter output: 0 errors | Partial check, extrapolation |
+| Type check clean | Typechecker (`tsc --noEmit`, `mypy`, `cargo check`): 0 errors | Linter passing, code compiles |
 | Build succeeds | Build command: exit 0 | Linter passing, logs look good |
+| Web UI / Frontend works | Real browser / Playwright / Chrome DevTools MCP: 200 OK, elements rendered, 0 console errors | jsdom unit test passes, "component mounted" |
+| Database persistence works | Real integration test / migration executed on live DB instance | Mock ORM / in-memory array |
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified | Test passes once |
+| Environment ready | Sanity/healthcheck command: exit 0, ports open, DB pinged | Packages installed, `.env` created |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
 
@@ -54,6 +58,8 @@ Skip any step = lying, not verifying
 - About to commit/push/PR without verification
 - Trusting agent success reports
 - Relying on partial verification
+- Assuming Web UI works because jsdom/mock tests pass
+- Assuming Database integration works because mock repository tests pass
 - Thinking "just this once"
 - Tired and wanting work over
 - **ANY wording implying success without having run verification**
@@ -65,7 +71,9 @@ Skip any step = lying, not verifying
 | "Should work now" | RUN the verification |
 | "I'm confident" | Confidence ≠ evidence |
 | "Just this once" | No exceptions |
-| "Linter passed" | Linter ≠ compiler |
+| "Linter passed" | Linter ≠ compiler / typechecker |
+| "JSDOM tests passed so web UI works" | JSDOM does not verify layout, CSS, browser APIs, hydration, or console errors. Verify in real browser / Playwright / DevTools MCP. |
+| "Mock database works, will connect later" | Mock debt breaks in production. Test against real DB / container. |
 | "Agent said success" | Verify independently |
 | "I'm tired" | Exhaustion ≠ excuse |
 | "Partial check is enough" | Partial proves nothing |
@@ -77,6 +85,24 @@ Skip any step = lying, not verifying
 ```
 ✅ [Run test command] [See: 34/34 pass] "All tests pass"
 ❌ "Should pass now" / "Looks correct"
+```
+
+**Web UI & Browser Verification (Playwright / Chrome DevTools MCP):**
+```
+✅ [Navigate page / Run Playwright] [Verify: 200 OK, element visible & interactive, 0 console errors] "UI verified in browser"
+❌ "Component rendered in React test / jsdom"
+```
+
+**Real Database & Persistence:**
+```
+✅ [Run migration & execute query on live DB] [See: record persisted and retrieved] "Real database persistence verified"
+❌ "Mock repository returned fixture"
+```
+
+**Type Check & Static Analysis:**
+```
+✅ [Run tsc --noEmit / mypy] [See: 0 errors] "Type check passed with 0 errors"
+❌ "It compiled and ran once"
 ```
 
 **Regression tests (TDD Red-Green):**

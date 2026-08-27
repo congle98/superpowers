@@ -63,14 +63,18 @@ Subagent (general-purpose):
     - Security concerns?
     - Integrates cleanly with surrounding code?
 
-    **Testing:**
+    **Testing & Verification:**
     - Tests verify real behavior, not mocks?
+    - Persistent data uses real database/storage (no in-memory mock debt)?
+    - Web/UI deliverables verified in real browser (Playwright / Chrome DevTools MCP with 0 console errors)?
     - Edge cases covered?
     - Integration tests where they matter?
     - All tests passing?
 
     **Production readiness:**
-    - Migration strategy if schema changed?
+    - Migration strategy if schema changed (reversible migrations)?
+    - No hardcoded secrets, tokens, or credentials committed?
+    - Environment variables documented in `.env.example`?
     - Backward compatibility considered?
     - Documentation complete?
     - No obvious bugs?

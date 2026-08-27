@@ -183,7 +183,7 @@ is the whole process.
 - Once you believe you understand what you're building, present the design
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
 - Ask after each section whether it looks right so far
-- Cover: architecture, components, data flow, error handling, testing
+- Cover: architecture, components, data persistence (real database/storage vs mock policy), environment prerequisites (AI vs human actions), data flow, error handling, testing (unit + real browser/E2E if web)
 - Be ready to go back and clarify if something doesn't make sense
 
 **Design for isolation and clarity:**
@@ -215,6 +215,7 @@ After writing the spec document, look at it with fresh eyes:
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **Real-stack & environment prerequisites:** Are real database engines and migrations specified (no in-memory mock debt)? Are external credentials and human-partner actions identified?
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
