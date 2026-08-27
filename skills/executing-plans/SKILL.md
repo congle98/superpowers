@@ -22,7 +22,14 @@ Load plan, review critically, execute all tasks, report when complete.
 4. If concerns: Raise them with your human partner before starting
 5. If no concerns: Create todos for the plan items and proceed
 
-### Step 2: Execute Tasks
+### Step 2: Pre-Flight Environment Check
+
+Before Task 1, verify the plan's prerequisites (see the plan's Environment & Prerequisites section):
+1. Run each verification command; confirm the expected output
+2. Missing something AI can prepare (a package, a Docker service, a seed script)? Prepare it now, re-verify
+3. Missing something only a human can prepare (credentials, accounts, access)? STOP. Hand over the checklist and wait. Never substitute a mock for it, and never start Task 1 without it
+
+### Step 3: Execute Tasks
 
 For each task:
 1. Mark as in_progress
@@ -30,7 +37,7 @@ For each task:
 3. Run verifications as specified
 4. Mark as completed
 
-### Step 3: Complete Development
+### Step 4: Complete Development
 
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."

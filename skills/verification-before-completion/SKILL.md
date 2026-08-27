@@ -45,6 +45,7 @@ Skip any step = lying, not verifying
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
+| UI works | Browser check: page loads, console 0 errors, screenshot | Tests pass, code looks right |
 | Requirements met | Line-by-line checklist | Tests passing |
 
 ## Red Flags - STOP
@@ -102,6 +103,23 @@ Skip any step = lying, not verifying
 ✅ Agent reports success → Check VCS diff → Verify changes → Report actual state
 ❌ Trust agent report
 ```
+
+**Web UI:**
+```
+✅ Browser tool loads real page → console 0 errors, no 4xx/5xx → screenshot → claim
+❌ "Tests pass so the page works" / "Code looks correct"
+```
+
+## Web UI Verification
+
+Claims about a web UI — "the page renders", "the flow works", "the form submits" — require browser evidence, not just passing tests:
+
+1. **OPEN:** Load the real page with a browser tool (chrome-devtools MCP or Playwright)
+2. **CHECK:** Console has zero errors; no failed network requests (4xx/5xx)
+3. **CAPTURE:** Screenshot as evidence
+4. **CLAIM:** Only now state the UI works — with the evidence
+
+No browser tool available? Say so and ask your human partner how to proceed. Never convert a missing browser check into "it should work" — that is a claim without evidence.
 
 ## When To Apply
 

@@ -22,6 +22,28 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+## Environment & Prerequisites
+
+Before defining tasks, inventory what the plan needs from the environment. Split it by who prepares it:
+
+**AI prepares** (at execution start, verified by a command):
+- Language/runtime versions, packages, dependencies
+- Local services via Docker (databases, caches, queues) — write the compose file, don't describe it
+- Seed scripts, fixtures, config templates
+
+**Human prepares** (listed in the plan as a step-by-step checklist, never faked):
+- Credentials, API keys, secrets
+- Cloud accounts, paid services, domains, DNS
+- Access permissions, third-party approvals
+
+Every prerequisite gets a verification command and its expected output. Tasks that depend on an unverified prerequisite must not run first. If a human-prepared item is missing at execution time, the executor stops and hands over the checklist — never substitute a mock for a missing credential or service.
+
+## Real Over Mock
+
+Plans default to real infrastructure from Task 1. The first task that touches data runs against a real database (local or Docker), not an in-memory fake or a mocked repository. Internal service calls are real HTTP/IPC, not stubs. Test data comes from seed scripts with realistic content, not hardcoded literals scattered through tests.
+
+Mocks are permitted only for dependencies you cannot control: third-party paid APIs, outbound email/SMS, services with no test credentials. Hardcoding response data, simulating something one command could install, or mocking internal modules is a plan defect — fix the plan, not the code around it.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
@@ -147,6 +169,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+**4. Environment and mock audit:** Does every environment prerequisite have a verification command and an owner (AI or human)? Is any task running against a mock where the real thing is one command away? Fix both before saving.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
