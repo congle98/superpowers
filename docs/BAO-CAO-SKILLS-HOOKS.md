@@ -142,6 +142,8 @@ Skill quy định phải invoke skill trước cả câu hỏi làm rõ. Nó đ�
 
 Nó cũng là nơi liên kết đến mapping của Codex, Pi, Antigravity và Hermes. Các file mapping biến hành động trừu tượng như “dispatch subagent”, “create todo”, “read file” thành tool thật của từng harness.
 
+Bootstrap còn đặt invariant readiness ở cấp workflow: capability bắt buộc phải được verify trước hành động phụ thuộc; capability không liên quan không bị ép cài đặt; human gate chưa hoàn tất là blocker và không được invent credential, dùng fallback không được duyệt hoặc giảm acceptance scope.
+
 ### 4.2. `brainstorming` — từ ý tưởng đến design được duyệt
 
 **File:** `skills/brainstorming/SKILL.md`
@@ -152,7 +154,7 @@ Skill phân loại yêu cầu thành ba path:
 
 1. **Spike:** câu hỏi khả thi; điều tra tối thiểu, báo cáo recommendation; code thử chỉ là throwaway.
 2. **Bounded:** thay đổi nhỏ trong flow đã tồn tại; hỏi các điểm cần thiết, trình bày design ngắn trong chat và chờ phê duyệt; không tạo spec file.
-3. **Architectural:** project/subsystem mới hoặc thay đổi interface; hỏi từng câu, đưa 2–3 phương án, trình bày design theo phần (gồm architecture, data persistence/real database, environment prerequisites, data flow, error handling, testing), viết spec vào `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, tự review tính khả thi real-stack và môi trường rồi mới chuyển sang `writing-plans`.
+3. **Architectural:** project/subsystem mới hoặc thay đổi interface; hỏi từng câu, đưa 2–3 phương án, trình bày design theo phần (gồm architecture, persistence/storage/service boundaries, Environment & Capabilities Readiness, data flow, error handling, testing), viết spec vào `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, tự review tính khả thi của real integration và môi trường rồi mới chuyển sang `writing-plans`.
 
 Skill có red flags để ngăn các lý do như “quá đơn giản nên không cần approval”. Nếu phát hiện complexity tăng giữa chừng, path phải được nâng cấp chứ không hạ cấp.
 
@@ -172,20 +174,22 @@ Sau khi cô lập, skill tự nhận diện setup (`npm install`, Cargo, Python,
 
 **File:** `skills/writing-plans/SKILL.md`
 
-Mục tiêu là viết plan cho một engineer biết rất ít context nhưng vẫn có thể làm đúng. Plan bắt buộc lưu ở `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` và phải có header gồm Goal, Architecture, Tech Stack, Spec, Global Constraints, **Environment & Prerequisites (Task 0 / Preflight)** và **Real Stack vs Mock Policy**.
+Mục tiêu là viết plan cho một engineer biết rất ít context nhưng vẫn có thể làm đúng. Plan bắt buộc lưu ở `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` và phải có header gồm Goal, Architecture, Tech Stack, Spec, Global Constraints, **Environment & Capabilities Readiness (Task 0 / Preflight)** và **Real Integration vs Mock Policy**.
 
 Skill yêu cầu:
 
-- **Phân tách môi trường (Task 0):** làm rõ AI Actions tự động (cài package, chạy docker, migration, copy env) và Human Action Gates (cung cấp API key, OAuth sandbox, cấp quyền cloud) cùng lệnh Sanity Verification kiểm tra kết nối service/database sống trước Task 1;
-- **Nguyên tắc Real-Stack-First:** bắt buộc dùng database thật, migration thật và core runtime từ đầu; nghiêm cấm nợ kỹ thuật bằng fake in-memory store (`const users = []`) hoặc fake mock API;
-- **Nghiệm thu Web UI:** với tác vụ web/frontend, mỗi task feature phải có bước kiểm thử trình duyệt thực tế (Playwright / Chrome DevTools MCP) xác nhận HTTP 200, hiển thị trực quan và 0 console error/warning;
+- **Environment & Capabilities Readiness / Task 0:** mọi plan phải khai báo các prerequisite thực sự liên quan theo các nhóm runtime/toolchain, dependencies, services, browser/tooling, browser acceptance decision, MCP, credentials/permissions/network và data/state; nhóm không áp dụng phải ghi `N/A — [reason]`. Task 0 phải có nhánh `Not applicable` nếu không có prerequisite.
+- **Install-or-block:** tách rõ AI Actions an toàn (cài đặt/cấu hình và verify) khỏi Human Actions Required. Nếu thiếu secret, account, permission, cost hoặc approval thì dừng với trạng thái `BLOCKED`, nêu exact action và verification command; không invent credential, fallback không được duyệt hoặc giảm acceptance scope.
+- **Real-integration-first:** dùng persistence, storage, service và core runtime thật ở các boundary mà acceptance criteria yêu cầu; không dùng fake persistence, hardcoded store hoặc simulated internal API để che integration chưa làm.
+- **Mock policy có chủ đích:** mock được phép ở deliberate unit seams cho thao tác chậm, không deterministic, unavailable, paid, destructive hoặc external khi side effect thật không thuộc behavior đang test; không mock boundary integration bắt buộc.
+- **Browser verification có điều kiện:** ghi rõ `Browser acceptance decision` gắn với acceptance criteria. Chỉ khi criteria có browser behavior mới yêu cầu Playwright hoặc capability Chrome DevTools MCP khả dụng; khi required phải verify flow, response, rendered/interactable elements và `0 unexpected console errors`, đồng thời xem xét warning riêng.
 - map file trước khi chia task;
 - mỗi task là deliverable độc lập, có test cycle riêng;
-- từng bước nhỏ 2–5 phút: viết test fail, chạy RED, code tối thiểu, chạy GREEN, browser/e2e check (nếu là web), commit;
+- từng bước nhỏ 2–5 phút: viết test fail, chạy RED, code tối thiểu, chạy GREEN, browser/e2e check chỉ khi browser acceptance required, commit;
 - ghi path chính xác, interface producer/consumer, code cần viết và lệnh verify;
 - không dùng placeholder như `TBD`, `TODO`, “add appropriate validation” hay “write tests for above”.
 
-Sau khi viết plan, skill tự review coverage với spec, quét placeholder, kiểm tra consistency của type/signature, kiểm tra tính sẵn sàng của môi trường Task 0, kiểm tra tuân thủ real-stack và phương án nghiệm thu web browser. Cuối cùng đưa lựa chọn `subagent-driven-development` hoặc `executing-plans`.
+Sau khi viết plan, skill tự review coverage với spec, quét placeholder, kiểm tra consistency của type/signature, kiểm tra từng capability và verification của Task 0, kiểm tra real-integration/mock policy và browser decision có căn cứ. Nếu self-review phát hiện vấn đề, phải sửa plan trước handoff; không coi việc tự review là lý do để bỏ qua repair. Cuối cùng đưa lựa chọn `subagent-driven-development` hoặc `executing-plans`.
 
 ### 4.5. `test-driven-development` — RED-GREEN-REFACTOR
 
@@ -202,9 +206,9 @@ Chu trình:
 5. **REFACTOR:** chỉ dọn duplication/tên/helper sau khi đang xanh.
 
 Nếu code đã viết trước test, skill yêu cầu xóa và bắt đầu lại, không giữ làm reference. `writing-good-tests.md` bổ sung quy tắc:
-- **Real Database & Storage First:** test trực tiếp với SQLite / Postgres container, cấm thay bằng in-memory array giả lập;
-- **Real Browser Execution for Web/UI:** JSDOM chỉ test logic render cây ảo, không test được layout, CSS, browser APIs, hydration hay console errors; bắt buộc kết hợp Playwright / Chrome DevTools MCP cho user flow thực tế;
-- **Giới hạn Mock:** Mock nghiêm ngặt chỉ dùng cho các dịch vụ 3rd-party không thể host cục bộ (Stripe API, external SMS/email).
+- **Real required integrations first:** không thay persistence, storage, service hoặc domain boundary mà acceptance criteria yêu cầu bằng in-memory array (`const store = []`), fake repository, hardcoded response hoặc simulated internal API; dùng implementation thật, local file thật hoặc service ephemeral/containerized với migration/config thật. Nếu dependency bắt buộc chưa sẵn sàng, phải chuẩn bị hoặc báo `BLOCKED`.
+- **Real browser khi acceptance yêu cầu:** JSDOM chỉ phù hợp để test logic cây ảo; khi browser behavior nằm trong acceptance criteria, phải kết hợp capability real-browser được hỗ trợ (Playwright hoặc Chrome DevTools MCP đã cấu hình), verify flow/DOM/interaction và `0 unexpected console errors`. Warning phải được xem xét riêng.
+- **Mock tại deliberate seams:** mock được phép để cô lập unit khỏi thao tác chậm, không deterministic, unavailable, paid, destructive hoặc external; side effect cần cho behavior vẫn phải real. Không dùng mock thay cho core persistence, service hoặc domain boundary đang giao.
 
 ### 4.6. `systematic-debugging` — tìm root cause trước khi sửa
 
@@ -237,10 +241,11 @@ Gate gồm năm bước:
 
 Skill phân biệt rõ:
 - **Unit/Integration test:** test command exit 0, 0 failures;
-- **Web UI / Frontend:** Real browser / Playwright / Chrome DevTools MCP: 200 OK, elements rendered, 0 console errors (không chấp nhận chỉ test JSDOM);
-- **Database persistence:** Test ghi/đọc dữ liệu thực tế trên DB instance đang chạy;
+- **Web UI / Frontend:** chỉ khi acceptance criteria có browser behavior thì dùng capability real-browser được hỗ trợ (Playwright / Chrome DevTools MCP) để verify expected response, rendered/interactable elements và `0 unexpected console errors`; warning được review riêng;
+- **Required integration:** exercise real implementation/service/storage boundary khi acceptance criteria yêu cầu, không chấp nhận mock hoặc in-memory substitute cho boundary đó;
+- **Environment & Capabilities readiness:** mỗi capability bắt buộc phải có setup/health check và expected evidence; cài package hoặc tạo `.env` tự nó không chứng minh readiness;
+- **Database/storage persistence:** khi là boundary bắt buộc, test ghi/đọc state thực tế trên instance đang chạy;
 - **Type check & Lint:** `tsc --noEmit`, `mypy`, `cargo check` exit 0, 0 errors/warnings;
-- **Environment ready:** Sanity/healthcheck command exit 0, DB ping thành công;
 - **Build / Regression test / Requirements met.**
 Report của agent cũng không được xem là bằng chứng thay cho diff/test độc lập.
 
@@ -264,8 +269,9 @@ Các đặc điểm quan trọng:
 
 - dùng workspace và ledger riêng cho từng plan trong `.superpowers/sdd/<plan-basename>/`;
 - đọc plan một lần, tạo task brief riêng và report file riêng;
+- setup phải đọc và thực thi Task 0 environment/capability readiness trước khi dispatch task implementation; human-action gate chưa hoàn tất là blocker;
 - implementer không được spawn reviewer/subagent khác;
-- implementer tự review và task reviewer kiểm tra nghiêm ngặt: tuân thủ real-stack (không dùng fake in-memory store) và kiểm thử Web/UI trên real browser (Playwright / Chrome DevTools MCP với 0 console errors);
+- implementer tự review và task reviewer kiểm tra nghiêm ngặt: prerequisites/capabilities đã verify hoặc task báo `BLOCKED` với exact human action; không invent credential hay dùng unapproved fallback; real-stack/required integration không bị thay bằng fake in-memory store; Web/UI chỉ dùng real-browser verification khi acceptance criteria yêu cầu (Playwright hoặc Chrome DevTools MCP khả dụng) và phải có `0 unexpected console errors`;
 - task review dùng diff package, không tin mù quáng report của implementer;
 - findings Critical/Important đi vào fix loop tối đa năm round;
 - round 1–3 resume implementer cũ, round 4–5 dùng implementer mới mạnh hơn;
@@ -278,7 +284,9 @@ Script hỗ trợ gồm `scripts/sdd-workspace`, `scripts/task-brief` và `scrip
 
 **File:** `skills/executing-plans/SKILL.md`
 
-Dùng khi đã có implementation plan và muốn thực hiện ở một session riêng, đặc biệt khi subagent orchestration không phù hợp. Skill yêu cầu announce, kiểm tra isolated workspace, đọc và review plan trước, nêu concern nếu có, tạo todo rồi chạy từng task theo đúng thứ tự và verification ghi trong plan.
+Dùng khi đã có implementation plan và muốn thực hiện ở một session riêng, đặc biệt khi subagent orchestration không phù hợp. Skill yêu cầu announce, kiểm tra isolated workspace, đọc và review plan trước, nêu concern nếu có, tạo todo rồi chạy Task 0 / readiness verification trước các task feature; sau đó chạy từng task theo đúng thứ tự và verification ghi trong plan.
+
+Task 0 phải dừng với trạng thái `BLOCKED` nếu còn human-action gate hoặc capability bắt buộc chưa được chuẩn bị; không được tự invent credential, dùng fallback không được duyệt hoặc tiếp tục implementation. Nếu tất cả category là `N/A` với lý do cụ thể, phải ghi nhận preflight không cần setup.
 
 Nếu có subagent capability, skill khuyến nghị dùng `subagent-driven-development` thay thế. Sau khi hoàn tất, bắt buộc gọi `finishing-a-development-branch`; nếu gặp blocker, test fail hoặc instruction không rõ thì dừng và hỏi thay vì đoán.
 
@@ -291,7 +299,7 @@ Review bắt buộc sau mỗi task của SDD, sau feature lớn và trước mer
 Agent phải lấy `BASE_SHA` và `HEAD_SHA`, sau đó dispatch reviewer với template `code-reviewer.md`. Template yêu cầu reviewer:
 
 - read-only trên checkout;
-- đánh giá requirements, architecture, quality, edge cases, testing (real behavior, real database, web browser verification);
+- đánh giá requirements, architecture, quality, edge cases, testing (real behavior, required persistence/service boundaries, conditional browser verification);
 - kiểm tra production readiness (schema migration reversibility, không commit hardcoded secrets, tài liệu `.env.example`);
 - phân loại Critical/Important/Minor;
 - trích file:line, lý do và hướng sửa;
@@ -526,7 +534,7 @@ README cũng liệt kê Factory Droid và Grok Build CLI là môi trường cài
 | Web/Browser verify | Playwright | Playwright | Playwright | Playwright/Chrome | Playwright | Playwright | `chrome-devtools` MCP / Playwright |
 | Hỏi user | native | native | `AskUserQuestion` | `ask_user` | native | terminal/dialogue | `ask_question` / native |
 
-Bảng trên thể hiện mapping được ghi trong source; tool thực tế luôn cần đối chiếu với phiên bản harness đang chạy vì native tool inventory có thể thay đổi.
+Bảng trên thể hiện mapping được ghi trong source; tool thực tế luôn cần đối chiếu với phiên bản harness đang chạy vì native tool inventory có thể thay đổi. Browser/Playwright/Chrome DevTools MCP trong bảng là capability hỗ trợ; chỉ dùng khi acceptance criteria của task yêu cầu browser behavior, không ép task không liên quan web phải cài hoặc gọi browser.
 
 ## 7. Kiểm thử và bằng chứng trong repository
 
@@ -568,6 +576,18 @@ Các test `tests/codex`, `tests/kimi`, `tests/devin` và `tests/antigravity` ki�
 
 `tests/brainstorm-server/` kiểm tra server visual companion: auth/session key, HTTP, WebSocket, lifecycle, file watching, browser launcher, branding và Windows lifecycle.
 
+### 7.6. Workflow invariants cho readiness và nghiệm thu
+
+`tests/writing-skills/test-workflow-invariants.sh` là regression test tĩnh cho các quy tắc behavior-shaping mới. Test kiểm tra:
+
+- readiness tổng quát theo capability và Task 0 `N/A` branch;
+- stop condition khi human gate/capability bắt buộc chưa sẵn sàng, không fallback hoặc invent credential;
+- real-integration-first cùng mock policy tại deliberate seams;
+- browser verification chỉ bắt buộc khi acceptance criteria có browser behavior, dùng `0 unexpected console errors` và review warning riêng;
+- self-review phải sửa plan trước handoff và SDD phải giữ hard gate.
+
+Test này bảo vệ các invariant xuyên nhiều skill; nó bổ sung cho pressure/eval testing hành vi agent, không thay thế eval live.
+
 ## 8. Nhận xét kiến trúc và điểm cần lưu ý
 
 ### Điểm mạnh
@@ -588,6 +608,7 @@ Các test `tests/codex`, `tests/kimi`, `tests/devin` và `tests/antigravity` ki�
 5. **Context size:** Hermes có giới hạn spill 10.000 ký tự; thay đổi bootstrap hoặc mapping phải giữ test giới hạn này.
 6. **Skill là behavior code:** sửa nội dung skill có thể thay đổi quyết định của agent. Theo `CLAUDE.md` và `writing-skills`, không nên reword/restructure tùy tiện nếu chưa có pressure/eval evidence.
 7. **Không tự coi test report là bằng chứng:** `verification-before-completion` yêu cầu chạy verification mới và đọc output thực tế trước khi claim hoàn tất.
+8. **Readiness không chỉ là database:** Task 0 phải phản ánh mọi capability bắt buộc — runtime, dependencies, services, browser/tooling, MCP, credentials, permissions, network và data state — với exact verification hoặc lý do `N/A`; không được tiếp tục khi human gate còn thiếu.
 
 ## 9. Kết luận
 
