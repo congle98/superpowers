@@ -22,25 +22,11 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 ## Environment & Prerequisites
 
-Before defining tasks, inventory what the plan needs from the environment. Split it by who prepares it:
-
-**AI prepares** (at execution start, verified by a command):
-- Language/runtime versions, packages, dependencies
-- Local services via Docker (databases, caches, queues) — write the compose file, don't describe it
-- Seed scripts, fixtures, config templates
-
-**Human prepares** (listed in the plan as a step-by-step checklist, never faked):
-- Credentials, API keys, secrets
-- Cloud accounts, paid services, domains, DNS
-- Access permissions, third-party approvals
-
-Every prerequisite gets a verification command and its expected output. Tasks that depend on an unverified prerequisite must not run first. If a human-prepared item is missing at execution time, the executor stops and hands over the checklist — never substitute a mock for a missing credential or service.
+Before defining tasks, inventory what the plan needs and split it by who prepares it. **AI prepares** at execution start: runtime versions, packages, local services (write the Docker compose file, not a description), seed scripts, config. **Human prepares** before execution: credentials, API keys, cloud accounts, paid services, domains, access, approvals. Every prerequisite gets a verification command and its expected output; a task whose prerequisites are unverified does not run. Human-prepared items ship as a checklist — never substituted, and a missing one blocks its dependent tasks, not the whole plan.
 
 ## Real Over Mock
 
-Plans default to real infrastructure from Task 1. The first task that touches data runs against a real database (local or Docker), not an in-memory fake or a mocked repository. Internal service calls are real HTTP/IPC, not stubs. Test data comes from seed scripts with realistic content, not hardcoded literals scattered through tests.
-
-Mocks are permitted only for dependencies you cannot control: third-party paid APIs, outbound email/SMS, services with no test credentials. Hardcoding response data, simulating something one command could install, or mocking internal modules is a plan defect — fix the plan, not the code around it.
+Default to real infrastructure when the environment can run it: a real database (local or Docker), real internal HTTP/IPC calls, seed data instead of hardcoded literals. Mocks are for dependencies you cannot control — third-party paid APIs, outbound email/SMS, services with no test credentials — and for pure-logic units where a real dependency adds nothing to the behavior under test. If the environment cannot run a required dependency, the plan says so and names the substitute as a declared temporary seam. Hardcoding a stand-in for something one command could install is a plan defect — fix the plan, not the code around it.
 
 ## File Structure
 
@@ -196,7 +182,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **5. Proportion:** Compare the plan's length to the spec's. A plan several times longer than the spec it implements is a transcript of the program, not a plan. If code blocks are most of the document, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous.
 
-**6. Environment and mock audit:** Does every environment prerequisite have a verification command and an owner (AI or human)? Is any task running against a mock where the real thing is one command away? Fix both before saving.
+**6. Environment and mock audit:** Does every environment prerequisite have a verification command and an owner (AI or human)? Is any task mocking something the environment can actually run? Fix both before saving.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

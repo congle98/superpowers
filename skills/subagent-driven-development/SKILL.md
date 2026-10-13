@@ -184,9 +184,10 @@ implementation.
 **Pre-flight environment check.** Before dispatching Task 1, run the plan's
 Environment & Prerequisites verification commands. Something AI can prepare —
 a package, a Docker service, a seed script — prepare it now and re-verify.
-Something only a human can prepare — credentials, accounts, access — stop
-and hand over the checklist; never substitute a mock for it, and never
-dispatch Task 1 without it. Record verified prerequisites in the ledger
+Something only a human can prepare — credentials, accounts, access — hand
+over the checklist; never substitute a mock for it, and never dispatch a
+task whose prerequisites are unverified. Prerequisites for later tasks can
+wait for that task's turn. Record verified prerequisites in the ledger
 (`Env: verified — <items>`), and carry the relevant environment notes into
 implementer dispatches so a fresh subagent does not rediscover what you
 already know.

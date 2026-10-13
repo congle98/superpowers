@@ -108,7 +108,7 @@ Vague name, tests mock not code
 **Requirements:**
 - One behavior
 - Clear name
-- Real code — real database (local or Docker), real internal services; mocks only for dependencies you cannot control (third-party paid APIs, outbound email/SMS)
+- Real code — a real database (local or Docker) and real internal services when the behavior touches them; mocks only for dependencies you cannot control (third-party paid APIs, outbound email/SMS) or pure-logic units where a real dependency adds nothing
 
 ### Verify RED - Watch It Fail
 
@@ -300,7 +300,7 @@ Before marking work complete:
 - [ ] Wrote minimal code to pass each test
 - [ ] All tests pass
 - [ ] Output pristine (no errors, warnings)
-- [ ] Tests use real code — real DB and internal services; mocks only for uncontrollable externals (third-party paid APIs, outbound email/SMS)
+- [ ] Tests use real code — real DB (local or Docker) and internal services when the behavior needs them; mocks only for uncontrollable externals or pure-logic units
 - [ ] Edge cases and errors covered
 
 Can't check all boxes? You skipped TDD. Start over.
@@ -312,7 +312,7 @@ Can't check all boxes? You skipped TDD. Start over.
 | Don't know how to test | Write wished-for API. Write assertion first. Ask your human partner. |
 | Test too complicated | Design too complicated. Simplify interface. |
 | Must mock everything | Code too coupled. Use dependency injection. |
-| Testing against a fake DB seems easier | A real DB costs one Docker command. Fakes hide the bugs real queries hit. |
+| Testing against a fake DB seems easier | When the environment can run one (local or Docker), a real DB costs one command. Fakes hide the bugs real queries hit. |
 | Test setup huge | Extract helpers. Still complex? Simplify design. |
 
 ## Debugging Integration

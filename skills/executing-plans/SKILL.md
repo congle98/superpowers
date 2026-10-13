@@ -166,8 +166,9 @@ Environment & Prerequisites section): run each prerequisite's verification
 command and confirm its expected output. Missing something AI can prepare
 (a package, a Docker service, a seed script)? Prepare it now and re-verify.
 Missing something only a human can prepare (credentials, accounts,
-access)? STOP. Hand over the checklist and wait — never substitute a mock
-for it, and never start Task 1 without it.
+access)? Hand over the checklist and wait — never substitute a mock for
+it, and never run a task whose prerequisites are unverified. Prerequisites
+for later tasks can wait for that task's turn.
 
 ## The Task Loop
 
